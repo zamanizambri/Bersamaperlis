@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Public Data Table</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #1f4e78;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Public Data</h1>
+
+    <div class="table-wrapper">
+        <table id="dataTable">
+            <tbody>
+                <tr>
+                    <td>Loading data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const spreadsheetId = '1-EBHw1qZx19oa50liW2vxBF9rU2G5zFiqG45v1gE7eE';
+const sheetGid = '0';
+
+const csvUrl =
+    `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${sheetGid}`;
+
+fetch(csvUrl)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Unable to load spreadsheet');
+        }
+
+        return response.text();
+    })
+    .then(csv => {
+        const rows = csv
+            .trim()
+            .split(/\r?\n/)
+            .map(row => row.split(','));
+    
+        const table = document.getElementById('dataTable');
+
+        table.innerHTML = '';
+
+        rows.forEach((row, rowIndex) => {
+            const tableRow = document.createElement('tr');
+
+            row.forEach(cell => {
+                const element = document.createElement(
+                    rowIndex === 0 ? 'th' : 'td'
+                );
+
+                element.textContent = cell.trim().replace(/^"|"$/g, '');
+                tableRow.appendChild(element);
+            });
+
+            table.appendChild(tableRow);
+        });
+    })
+    .catch(error => {
+        document.getElementById('dataTable').innerHTML =
+            '<tr><td>Unable to load spreadsheet data.</td></tr>';
+
+        console.error(error);
+    });
+</script>
+
+</body>
+</html>
